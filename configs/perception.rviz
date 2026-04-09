@@ -1,0 +1,84 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Value: true
+      Cell Size: 5
+      Color: 100; 100; 100
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+
+    - Class: rviz_default_plugins/MarkerArray
+      Name: 3D Detections
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /perception/markers
+        Depth: 5
+        Reliability Policy: Best Effort
+
+    - Class: rviz_default_plugins/Image
+      Name: Camera Feed
+      Enabled: true
+      Value: true
+      Topic:
+        Value: /perception/image
+        Depth: 5
+        Reliability Policy: Best Effort
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Normalize Range: true
+
+    - Class: rviz_default_plugins/Axes
+      Name: EgoVehicle
+      Enabled: true
+      Value: true
+      Length: 2
+      Radius: 0.3
+      Reference Frame: base_link
+
+  Enabled: true
+  Global Options:
+    Background Color: 30; 30; 30
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/FocusCamera
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/ThirdPersonFollower
+      Distance: 50
+      Enable Stereo Rendering:
+        Value: false
+      Focal Point:
+        X: 15
+        Y: 0
+        Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.7
+      Target Frame: base_link
+      Yaw: 3.14

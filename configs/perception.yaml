@@ -1,0 +1,36 @@
+# 3D Perception Pipeline Configuration
+
+# Video input
+video_path: 'data/videos/testvid.webm'
+process_width: 640
+process_height: 360
+max_frames: 500
+
+# Camera intrinsics (approximate for dashcam)
+camera:
+  focal_length: 700
+  cx: 320
+  cy: 180
+
+# YOLOv8 detection
+detection:
+  model: 'yolov8m.pt'
+  confidence: 0.4
+  classes: [0, 1, 2, 3, 5, 7]  # person, bicycle, car, motorcycle, bus, truck
+
+# Depth estimation
+depth:
+  model: 'depth-anything/Depth-Anything-V2-Small-hf'
+  max_depth: 80.0  # meters
+
+# BEV settings
+bev:
+  size: 400
+  range_x: 40  # meters forward
+  range_y: 20  # meters sideways
+
+# Output
+output:
+  video: 'outputs/videos/perception_3d.mp4'
+  frames_dir: 'outputs/inference'
+  fps: 15

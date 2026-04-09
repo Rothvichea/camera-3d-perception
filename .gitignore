@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.conda/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Models & weights (too large for git)
+models/onnx/*.onnx
+models/tensorrt/*.engine
+*.pt
+*.pth
+*.safetensors
+
+# Data (too large for git)
+data/videos/*.mp4
+data/videos/*.avi
+data/nuscenes/
+
+# Outputs
+outputs/videos/*.mp4
+outputs/inference/*.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiled C++
+src/cpp/*.so
+src/cpp/*.cpython*
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Logs
+*.log
+*.webm
