@@ -1,16 +1,53 @@
-# Camera-Based 3D Perception Stack
+# 🎯 Camera-Based 3D Perception Stack
 
-Real-time 3D object detection, depth estimation, multi-object tracking, and bird's-eye-view projection from a single RGB camera — with ROS2 integration for robotic deployment.
+<div align="center">
+
+**Real-time 3D object detection, depth estimation, multi-object tracking, and bird's-eye-view projection from a single RGB camera — with C++ acceleration and ROS2 integration for robotic deployment.**
+
+[![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)](https://python.org)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org)
+[![ROS2](https://img.shields.io/badge/ROS2-Humble-22314E?logo=ros&logoColor=white)](https://docs.ros.org/en/humble/)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8m-Ultralytics-00FFFF?logo=yolo&logoColor=black)](https://github.com/ultralytics/ultralytics)
+[![HuggingFace](https://img.shields.io/badge/Depth_Anything_v2-HuggingFace-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf)
+[![C++](https://img.shields.io/badge/C++-17-00599C?logo=cplusplus&logoColor=white)](https://isocpp.org)
+[![pybind11](https://img.shields.io/badge/pybind11-Acceleration-orange)](https://github.com/pybind/pybind11)
+[![OpenCV](https://img.shields.io/badge/OpenCV-4.13-5C3EE8?logo=opencv&logoColor=white)](https://opencv.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+[**Results**](#results) · [**Architecture**](#architecture) · [**C++ Speedup**](#c-acceleration) · [**ROS2 Node**](#run-with-ros2--rviz) · [**Quick Start**](#quick-start)
+
+</div>
+
+---
+
+<div align="center">
 
 ![Pipeline Demo](docs/demo_preview.png)
 
+*Camera-based 3D perception: YOLOv8 detection + Depth Anything v2 + ByteTrack tracking + BEV projection at **22+ FPS** on RTX 3060*
+
+</div>
+
+---
+
+<div align="center">
+
+| 🚀 22+ FPS Real-Time | 🎯 8-17 Objects/Frame | ⚡ 670x C++ Speedup | 🤖 ROS2 Ready |
+|:---:|:---:|:---:|:---:|
+| RTX 3060 6GB | Car, Person, Truck, Bus | IoU computation | MarkerArray + RViz |
+
+</div>
+
+---
+
 ## Key Features
 
-- **3D Object Detection** — YOLOv8 + Depth Anything v2 for camera-only 3D perception
-- **Multi-Object Tracking** — ByteTrack with Kalman filter for persistent object IDs
-- **Bird's Eye View** — Real-time top-down projection of detected objects
-- **C++ Acceleration** — pybind11 module with up to 670x speedup on post-processing
+- **3D Object Detection** — YOLOv8 + Depth Anything v2 for camera-only 3D perception (no LiDAR needed)
+- **Multi-Object Tracking** — ByteTrack with Kalman filter for persistent object IDs across frames
+- **Bird's Eye View** — Real-time top-down projection of all detected objects with distance
+- **C++ Acceleration** — pybind11 module: 670x speedup on IoU, 5.7x on depth sampling
 - **ROS2 Integration** — Publishes MarkerArray, Image, and JSON detections for robotic systems
+- **RViz Visualization** — One-command launch: perception + TF + RViz with 3D boxes
 - **Real-Time** — 22+ FPS on RTX 3060 laptop GPU (46ms per frame)
 
 ## Architecture
@@ -49,18 +86,38 @@ RGB Camera / Video
 | Total C++ overhead | **0.38ms** per frame |
 | GPU memory | ~2GB |
 
+### Sample Output Frames
+
+<div align="center">
+
+| Camera + BEV (Tracked) | Description |
+|:-:|:-:|
+| ![Frame 1](docs/tracked_sample_1.png) | Urban driving: cars detected at 8-50m with persistent track IDs |
+| ![Frame 2](docs/tracked_sample_2.png) | Multi-class: cars, persons, trucks with BEV positions |
+
+</div>
+
+### RViz 3D Visualization
+
+<div align="center">
+
+![RViz](docs/rviz_screenshot.png)
+
+*ROS2 RViz2 showing 3D detection boxes in real-time from the perception node*
+
+</div>
+
 ## Tech Stack
 
 | Category | Technologies |
 |----------|-------------|
 | Detection | YOLOv8m (Ultralytics) |
-| Depth | Depth Anything v2 (HuggingFace) |
+| Depth | Depth Anything v2 Small (HuggingFace) |
 | Tracking | ByteTrack + Kalman Filter |
-| Deep Learning | PyTorch, CUDA |
-| C++ Acceleration | pybind11, g++ -O3 |
-| Visualization | OpenCV, RViz2 |
-| Robotics | ROS2 Humble |
-| Experiment Tracking | MLflow |
+| Deep Learning | PyTorch 2.x, CUDA 12.x |
+| C++ Acceleration | pybind11, g++ -O3, C++17 |
+| Visualization | OpenCV, RViz2, BEV Renderer |
+| Robotics | ROS2 Humble (MarkerArray, Image, TF2) |
 | Language | Python 3.10, C++17 |
 
 ## Project Structure
@@ -71,7 +128,6 @@ camera-3d-perception/
 |   |-- perception.yaml          # Pipeline configuration
 |   +-- perception.rviz          # RViz2 display config
 |-- src/
-|   |-- detection/               # YOLOv8 wrapper
 |   |-- depth/
 |   |   +-- depth_to_3d.py       # Pinhole camera model, 2D+depth -> 3D
 |   |-- tracking/
@@ -103,7 +159,7 @@ camera-3d-perception/
 - Ubuntu 22.04
 - NVIDIA GPU with CUDA support
 - Conda (Miniconda or Anaconda)
-- ROS2 Humble (for ROS2 features)
+- ROS2 Humble (optional, for ROS2 features)
 
 ### Installation
 
@@ -132,7 +188,7 @@ bash src/cpp/build.sh
 ### Run Standalone (no ROS2)
 
 ```bash
-# Basic pipeline
+# Basic pipeline (detection + depth + BEV)
 python3 scripts/run_perception.py
 
 # Full pipeline with tracking + C++ acceleration
@@ -147,23 +203,18 @@ python3 scripts/run_perception_tracked.py
 source /opt/ros/humble/setup.bash
 conda activate perception
 
-# Launch everything (perception + TF + RViz)
+# Launch everything (perception + TF + RViz) with one command
 ros2 launch launch/perception_launch.py
-
-# Or run manually:
-# Terminal 1: ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map base_link
-# Terminal 2: python3 src/ros2_node/perception_node.py
-# Terminal 3: rviz2 -d configs/perception.rviz
 ```
 
 ### ROS2 Topics
 
 | Topic | Type | Description |
 |-------|------|-------------|
-| `/perception/markers` | MarkerArray | 3D boxes for RViz visualization |
-| `/perception/image` | Image | Annotated camera feed |
-| `/perception/detections` | String | JSON with tracked objects and 3D positions |
-| `/perception/bev` | Image | Bird's eye view |
+| `/perception/markers` | `MarkerArray` | 3D boxes for RViz visualization |
+| `/perception/image` | `Image` | Annotated camera feed |
+| `/perception/detections` | `String` | JSON with tracked objects and 3D positions |
+| `/perception/bev` | `Image` | Bird's eye view |
 
 ### Example Detection JSON
 
@@ -183,31 +234,31 @@ ros2 launch launch/perception_launch.py
 
 ### Depth-to-3D Projection
 
-Uses the inverse pinhole camera model to project 2D detections into 3D space:
+Uses the inverse pinhole camera model to lift 2D detections into 3D space:
 
 ```
-X = (u - cx) * Z / fx      (lateral position)
-Y = (v - cy) * Z / fy      (vertical position)
-Z = estimated depth         (forward distance)
-distance = sqrt(X^2 + Z^2) (ground distance)
+X = (u - cx) * Z / fx      (lateral position in meters)
+Y = (v - cy) * Z / fy      (vertical position in meters)
+Z = estimated depth         (forward distance in meters)
+distance = sqrt(X^2 + Z^2) (ground-plane distance)
 ```
 
-Depth is estimated using a combination of bounding box size heuristic (larger box = closer object) refined by the Depth Anything v2 relative depth map.
+Depth is estimated using a combination of bounding box size heuristic (larger box = closer object) refined by the Depth Anything v2 relative depth map for correct ordering.
 
 ### ByteTrack Multi-Object Tracking
 
-Based on ByteTrack (Zhang et al., ECCV 2022):
+Based on [ByteTrack (Zhang et al., ECCV 2022)](https://arxiv.org/abs/2110.06864):
 
 1. **Split** detections into high-confidence and low-confidence groups
 2. **Match** high-confidence detections to existing tracks using IoU
-3. **Recover** lost tracks by matching with low-confidence detections
-4. **Predict** motion between frames using Kalman filter
+3. **Recover** lost tracks by matching with low-confidence detections (handles occlusion)
+4. **Predict** motion between frames using Kalman filter (constant velocity model)
 5. **Create** new tracks for unmatched high-confidence detections
-6. **Remove** tracks not seen for 30 frames
+6. **Remove** tracks not seen for 30+ frames
 
 ### C++ Acceleration
 
-Performance-critical operations implemented in C++17 with pybind11 bindings:
+Performance-critical operations implemented in C++17 with pybind11 Python bindings:
 
 | Operation | Python | C++ | Speedup |
 |-----------|--------|-----|---------|
@@ -215,15 +266,16 @@ Performance-critical operations implemented in C++17 with pybind11 bindings:
 | Depth sampling (20 boxes) | 2,150 us | 374 us | **5.7x** |
 | 2D NMS | -- | 2.3 us | native |
 | 3D conversion (batch) | -- | 0.6 us | native |
-| **Total post-processing** | -- | **0.38 ms** | near-zero overhead |
+| **Total post-processing** | **~3ms** | **0.38 ms** | **~8x overall** |
 
 ### Bird's Eye View (BEV)
 
 Objects are projected onto a top-down grid centered on the ego vehicle:
 - X-axis: lateral position (left/right)
 - Y-axis: forward distance (depth)
-- Color-coded by class (green=car, red=person, orange=truck)
+- Color-coded by class (green=car, red=person, magenta=bus, orange=truck)
 - Grid lines every 5 meters for scale reference
+- Ego vehicle shown at bottom center
 
 ## Hardware Requirements
 
@@ -236,6 +288,32 @@ Objects are projected onto a top-down grid centered on the ego vehicle:
 | OS | Ubuntu 22.04 | Ubuntu 22.04 |
 | CUDA | 11.8+ | 12.1+ |
 
+## Configuration
+
+Edit `configs/perception.yaml` to customize:
+
+```yaml
+# Video input
+video_path: 'data/videos/your_video.mp4'
+
+# Camera intrinsics (adjust for your camera)
+camera:
+  focal_length: 700
+  cx: 320
+  cy: 180
+
+# Detection
+detection:
+  model: 'yolov8m.pt'
+  confidence: 0.4
+  classes: [0, 1, 2, 3, 5, 7]  # COCO classes
+
+# Depth
+depth:
+  model: 'depth-anything/Depth-Anything-V2-Small-hf'
+  max_depth: 80.0
+```
+
 ## References
 
 - [YOLOv8](https://github.com/ultralytics/ultralytics) - Ultralytics, 2023
@@ -243,12 +321,13 @@ Objects are projected onto a top-down grid centered on the ego vehicle:
 - [ByteTrack](https://arxiv.org/abs/2110.06864) - Zhang et al., ECCV 2022
 - [ECA-Net](https://arxiv.org/abs/1910.03151) - Wang et al., CVPR 2020
 - [PointPillars](https://arxiv.org/abs/1812.05784) - Lang et al., CVPR 2019
-- [ROS2 Humble](https://docs.ros.org/en/humble/)
+- [ROS2 Humble Documentation](https://docs.ros.org/en/humble/)
 
 ## Related Projects
 
-- [AV 3D Perception Stack (LiDAR)](https://github.com/Rothvichea/av-perception-stack) - PointPillars-based 3D detection from LiDAR point clouds
-- [Inspection Robot Nav2](https://github.com/Rothvichea/inspection-robot-nav2) - 4WS autonomous navigation with SLAM
+- [AV 3D Perception Stack (LiDAR)](https://github.com/Rothvichea/av-perception-stack) — PointPillars 3D detection from LiDAR with ECA attention, C++ optimization (222x speedup), and MLflow tracking
+- [Inspection Robot Nav2](https://github.com/Rothvichea/inspection-robot-nav2) — 4WS autonomous navigation with SLAM, EKF fusion, and MPPI controller
+- [Industrial Safety Monitor](https://github.com/Rothvichea) — YOLOv8 PPE detection with Qt6 dashboard and ZMQ streaming
 
 ## License
 
@@ -256,8 +335,8 @@ MIT License
 
 ## Author
 
-**Rothvichea CHEA** - Mechatronics Engineer, IMT Mines Ales, France
+**Rothvichea CHEA** — Mechatronics Engineer, IMT Mines Ales, France
 
-- [Portfolio](https://rothvicheachea.netlify.app)
-- [LinkedIn](https://www.linkedin.com/in/chea-rothvichea-a96154227/)
-- [GitHub](https://github.com/Rothvichea)
+[![Portfolio](https://img.shields.io/badge/Portfolio-rothvicheachea.netlify.app-blue?style=flat-square)](https://rothvicheachea.netlify.app)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Rothvichea_CHEA-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/chea-rothvichea-a96154227/)
+[![GitHub](https://img.shields.io/badge/GitHub-Rothvichea-181717?style=flat-square&logo=github)](https://github.com/Rothvichea)
